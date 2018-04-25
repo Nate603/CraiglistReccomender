@@ -16,6 +16,7 @@ parser.add_argument("-z", "--zip", help="Zipcode (default: None)", action="store
 parser.add_argument("-minp", "--min_price", help="Minimum price of the item (default: None)", action="store", default=None)
 parser.add_argument("-maxp", "--max_price", help="Maximum price of the item (default: None)", action="store", default=None)
 parser.add_argument("-ma", "--make", help="Make/Model of the item (default: None)", action="store", default=None)
+parser.add_argument("-mo", "--model", help="Make/Model of the item (default: None)", action="store", default=None)
 parser.add_argument("-minen", "--min_eng_disp", help="Minimum engine displacement (default: None)", action="store", default=None)
 parser.add_argument("-maxen", "--max_eng_disp", help="Maximum engine displacement (default: None)", action="store", default=None)
 parser.add_argument("-miny", "--min_year", help="Minimum model year (default: None)", action="store", default=None)
@@ -30,9 +31,6 @@ parser.add_argument("-tr", "--trans", help="Transmission (Options: manual, autom
 parser.add_argument("-l", "--location", help="Location of the item (default: None)", action="store", default=None)
 results = parser.parse_args()
 
-baseUrl = 'https://boston.craigslist.org/search/sss?sort=rel'
-
-#print("results: " + str(results))
 
 baseUrl = 'https://boston.craigslist.org/search/sss?sort=rel'
 
