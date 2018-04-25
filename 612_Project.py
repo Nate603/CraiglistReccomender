@@ -52,9 +52,6 @@ if results.max_price:
 if results.make:
     location= "&postal=" + str(results.location)
     baseUrl = baseUrl + location
-if results.model:
-    miles= "&search_distance=" + str(results.miles)
-    baseUrl = baseUrl + miles
 if results.min_eng_disp:
     location= "&postal=" + str(results.location)
     baseUrl = baseUrl + location
