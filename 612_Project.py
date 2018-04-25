@@ -35,95 +35,91 @@ results = parser.parse_args()
 baseUrl = 'https://boston.craigslist.org/search/sss?sort=rel'
 
 #print("results: " + str(results))
-miles=''
-postal=''
-min_price=''
-max_price=''
-make=''
-model=''
-min_eng_disp=''
-max_eng_disp=''
-min_year=''
-max_year=''
-min_odo=''
-max_odo=''
-condition=''
-fuel=''
-color=''
-title=''
-trans=''
-location=''
+#declare variables
+miles='';postal='';min_price='';max_price='';make='';model=''
+min_eng_disp='';max_eng_disp='';min_year='';max_year=''
+min_odo='';max_odo='';condition='';fuel='';color=''
+title='';trans='';location='';query='';
 
-if results.miles:
-    location= "&search_distance=" + str(results.location)
-    baseUrl = baseUrl + location
-    
-if results.postal:
-    miles= "&postal=" + str(results.miles)
-    baseUrl = baseUrl + miles
-    
-if results.min_price:
-    location= "&min_price=" + str(results.location)
-    baseUrl = baseUrl + location
-    
-if results.max_price:
-    miles= "&max_price=" + str(results.miles)
-    baseUrl = baseUrl + miles
-    
+
 if results.make:
-    location= "&auto_make_model=" + str(results.location)
-    baseUrl = baseUrl + location
+    make = str(results.make)
     
 if results.model:
-    miles= "&postal=" + str(results.miles)
+    model = str(results.model)
+    
+#query with make and model
+if results.make and results.model:
+    baseUrl = baseUrl + '&query=' + make + "+" + model
+if results.make and results.model == None:
+    #print('1')
+    baseUrl = baseUrl + '&query=' + make
+if results.make == None and results.model:
+    #print('2')
+    baseUrl = baseUrl + '&query=' + model
+
+if results.miles:
+    miles = "&search_distance=" + str(results.miles)
     baseUrl = baseUrl + miles
     
+if results.zip:
+    postal = "&postal=" + str(results.zip)
+    baseUrl = baseUrl + postal
+    
+if results.min_price:
+    min_price = "&min_price=" + str(results.min_price)
+    baseUrl = baseUrl + min_price
+    
+if results.max_price:
+    max_price = "&max_price=" + str(results.max_price)
+    baseUrl = baseUrl + max_price
+
 if results.min_eng_disp:
-    location= "&min_engine_displacement_cc=" + str(results.location)
-    baseUrl = baseUrl + location
+    min_eng_disp = "&min_engine_displacement_cc=" + str(results.min_eng_disp)
+    baseUrl = baseUrl + min_eng_disp
     
 if results.max_eng_disp:
-    miles= "&max_engine_displacement_cc=" + str(results.miles)
-    baseUrl = baseUrl + miles
+    max_eng_disp = "&max_engine_displacement_cc=" + str(results.max_eng_disp)
+    baseUrl = baseUrl + max_eng_disp
     
 if results.min_year:
-    location= "&min_auto_year=" + str(results.location)
-    baseUrl = baseUrl + location
+    min_year = "&min_auto_year=" + str(results.min_year)
+    baseUrl = baseUrl + min_year
     
 if results.max_year:
-    location= "&max_auto_year=" + str(results.location)
-    baseUrl = baseUrl + location
+    max_year = "&max_auto_year=" + str(results.max_year)
+    baseUrl = baseUrl + max_year
     
 if results.min_odo:
-    location= "&min_auto_miles=" + str(results.location)
-    baseUrl = baseUrl + location
+    min_odo = "&min_auto_miles=" + str(results.min_odo)
+    baseUrl = baseUrl + min_odo
     
 if results.max_odo:
-    location= "&max_auto_miles=" + str(results.location)
-    baseUrl = baseUrl + location
+    max_odo = "&max_auto_miles=" + str(results.max_odo)
+    baseUrl = baseUrl + max_odo
     
 if results.condition:
-    location= "&condition=" + str(results.location)
-    baseUrl = baseUrl + location
+    condition = "&condition=" + str(results.condition)
+    baseUrl = baseUrl + condition
     
 if results.fuel:
-    location= "&auto_fuel_type=" + str(results.location)
-    baseUrl = baseUrl + location
+    fuel = "&auto_fuel_type=" + str(results.fuel)
+    baseUrl = baseUrl + fuel
     
 if results.color:
-    location= "&auto_paint=" + str(results.location)
-    baseUrl = baseUrl + location
+    color = "&auto_paint=" + str(results.color)
+    baseUrl = baseUrl + color
     
 if results.title:
-    location= "&auto_title_status=" + str(results.location)
-    baseUrl = baseUrl + location
+    title = "&auto_title_status=" + str(results.title)
+    baseUrl = baseUrl + title
     
 if results.trans:
-    location= "&auto_transmission=" + str(results.location)
-    baseUrl = baseUrl + location
+    trans = "&auto_transmission=" + str(results.trans)
+    baseUrl = baseUrl + trans
     
 if results.location:
-    location= "&postal=" + str(results.location)
+    location = "&postal=" + str(results.location)
     baseUrl = baseUrl + location
 
   
