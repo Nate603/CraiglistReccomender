@@ -9,7 +9,6 @@ Created on Tue Apr 24 20:37:04 2018
 #from urllib.request import urlopen
 #from bs4 import BeautifulSoup
 import argparse
-
 parser = argparse.ArgumentParser(description='Takes in filters for craigslist search (exclusively for motorcycles and cars)')
 parser.add_argument("-mi", "--miles", help="Miles from zip (default: None)", action="store", default=None)
 parser.add_argument("-z", "--zip", help="Zipcode (default: None)", action="store", default=None)
@@ -122,8 +121,26 @@ if results.location:
     location = "&postal=" + str(results.location)
     baseUrl = baseUrl + location
 
-  
+
 print(baseUrl)        
-  
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+rec = open("initialRecommendations.csv", 'w')
+response = urlopen(baseUrl)
+soup = BeautifulSoup(response, "lxml")
+for child in soup.find_all("li", {"class" : "result-row"}):
+   stri = ""
+   title = ""
+   link = ""
+   date = ""
+   title = child.p.a.get_text()
+   link = child.p.a.attrs['href']
+   date = child.p.time.attrs['datetime']
+   stri = date + "," + title + "," + link + "\n"
+   try:
+       rec.write(stri)
+   except:
+       stri = date + "," + "Bad encoding!" + "," + link + "\n"
+rec.close()
 
     
