@@ -130,8 +130,36 @@ if results.location:
 
 
 print(baseUrl)        
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup
+from fake_useragent import UserAgent
+import random
+def random_proxy():
+    return random.randint(0, len(proxies) - 1)
+userAg = UserAgent()
+proxies = []
+# Retrieve latest proxies
+proxies_req = Request('https://www.sslproxies.org/')
+proxies_req.add_header('User-Agent', userAg.random)
+proxies_doc = urlopen(proxies_req).read().decode('utf8')
+soup = BeautifulSoup(proxies_doc, 'html.parser')
+proxies_table = soup.find(id='proxylisttable')
+
+# Save proxies in the array
+for row in proxies_table.tbody.find_all('tr'):
+    proxies.append({'ip' : row.find_all('td')[0].string, 'port' : row.find_all('td')[1].string})
+
+# Choose a random proxy
+proxy_index = random_proxy()
+proxy = proxies[proxy_index]
+for p in proxies:
+    try:
+        test = urlopen(baseUrl)
+    except:
+        del proxies[proxy_index]
+        proxy_index = random_proxy()
+        proxy = proxies[proxy_index]
+
 rec = open("initialRecommendations.csv", 'w')
 rec.write('date' + "," + 'title' + "," + 'link' + ',' + 'Make/Model' + ',' + 'odometer' + ',' 
           + 'Color' + ','+ 'Fuel Type' + ','+ 'VIN' + ','+ 'Title Status' + ','+ 'Car Type' + ','
@@ -139,6 +167,7 @@ rec.write('date' + "," + 'title' + "," + 'link' + ',' + 'Make/Model' + ',' + 'od
 response = urlopen(baseUrl)
 soup = BeautifulSoup(response, "lxml")
 lis = []
+counter = 0
 for child in soup.find_all("li", {"class" : "result-row"}):
    stri = ""
    title = ""
@@ -147,56 +176,67 @@ for child in soup.find_all("li", {"class" : "result-row"}):
    title = child.p.a.get_text()
    link = child.p.a.attrs['href']
    date = child.p.time.attrs['datetime']
-   stri = date + "," + title + "," + link + "\n"   
-   nextlink = urlopen(link)
-   soup2 = BeautifulSoup(nextlink, "lxml")
-   listofstrings=[]
-   count=0
-   for child2 in soup2.find_all("p", {"class" : "attrgroup"}):
-       datadict={}
-       childlist=[]
-       datadict = {'name':"" ,'odometer':"",'paint color':"",'fuel':"",
-                   'VIN':'','title status':"",'type':"",'transmission':"",
-                   'size':"",'drive':"",'cylinders':"",'condition':""}
-       count=count+1
-       if count == 2:
-           for children in child2.find_all('span'):
-               listofstrings.append(children.get_text())       
-       else:        
-           listofstrings.append(child2.get_text().strip())
+   stri = date + "," + title + "," + link + "\n"  
+   response.set_proxy(proxy['ip'] + ':' + proxy['port'], 'http')
+   counter = counter + 1
+   if counter % 10 == 0:
+       proxy_index = random_proxy()
+       proxy = proxies[proxy_index]
+   if stri not in lis:
+       lis.append(stri)
+       nextlink = urlopen(link)
+       soup2 = BeautifulSoup(nextlink, "lxml")
+       listofstrings=[]
+       count=0
+       for child2 in soup2.find_all("p", {"class" : "attrgroup"}):
+           datadict={}
+           childlist=[]
+           datadict = {'name':"" ,'odometer':"",'paint color':"",'fuel':"",
+                       'VIN':'','title status':"",'type':"",'transmission':"",
+                       'size':"",'drive':"",'cylinders':"",'condition':""}
+           count=count+1
+           if count == 2:
+               for children in child2.find_all('span'):
+                   listofstrings.append(children.get_text())       
+           else:        
+               listofstrings.append(child2.get_text().strip())
+               
+            #print(listofstrings)
+           datadict['name'] = listofstrings[0]
+           #print(datadict)
            
-       #print(listofstrings)
-       datadict['name'] = listofstrings[0]
-       #print(datadict)
-       
-       for data in listofstrings:
-           keyvalue = data.split(":")
-           try:
-               keyvalue[1]=keyvalue[1].strip()
-           except IndexError:
-               pass
-           #print(keyvalue)
-           try:
-               datadict[keyvalue[0]]=keyvalue[1]
-           except IndexError:
-               pass
+           for data in listofstrings:
+               keyvalue = data.split(":")
+               try:
+                   keyvalue[1]=keyvalue[1].strip()
+               except IndexError:
+                   pass
+               #print(keyvalue)
+               try:
+                   datadict[keyvalue[0]]=keyvalue[1]
+               except IndexError:
+                   pass
+               
+           print("data: " , datadict)
+           #print(listofstrings)
+           #print(child2.get_text())
            
-       print(datadict)
-       #print(listofstrings)
-       #print(child2.get_text())
-       
-   try:
-       stri = (str(date) + "," + str(title) + "," + str(link) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
-       + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
-       + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
-       + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
-       rec.write(stri)
-   except:
-       stri = (str(date) + "," + "Bad Encoding!" + "," + str(link) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
-       + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
-       + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
-       + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
-       rec.write(stri)
+       try:
+           stri = (str(date) + "," + str(title) + "," + str(link) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
+           + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
+           + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
+           + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
+           rec.write(stri)
+       except:
+           stri = (str(date) + "," + "Bad Encoding!" + "," + str(link) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
+           + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
+           + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
+           + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
+           rec.write(stri)
+   else:
+       print('pass')
+       pass
 rec.close()
+
 
     
