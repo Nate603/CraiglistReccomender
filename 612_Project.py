@@ -176,12 +176,15 @@ for child in soup.find_all("li", {"class" : "result-row"}):
    title = child.p.a.get_text()
    link = child.p.a.attrs['href']
    date = child.p.time.attrs['datetime']
-   stri = date + "," + title + "," + link + "\n"  
-   response.set_proxy(proxy['ip'] + ':' + proxy['port'], 'http')
+   stri = date + "," + title + "," + link + "\n"
+   req = Request(baseUrl)
+   req.set_proxy(proxy['ip'] + ':' + proxy['port'], 'http')
+   print('proxy set')
    counter = counter + 1
    if counter % 10 == 0:
        proxy_index = random_proxy()
        proxy = proxies[proxy_index]
+       print('proxy: ' , proxy)
    if stri not in lis:
        lis.append(stri)
        nextlink = urlopen(link)
@@ -216,7 +219,9 @@ for child in soup.find_all("li", {"class" : "result-row"}):
                    datadict[keyvalue[0]]=keyvalue[1]
                except IndexError:
                    pass
-               
+           for k in datadict:
+               if datadict[k] == '':
+                   datadict[k] = 'N/A'
            print("data: " , datadict)
            #print(listofstrings)
            #print(child2.get_text())
