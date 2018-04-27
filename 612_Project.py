@@ -128,7 +128,9 @@ from bs4 import BeautifulSoup
 rec = open("initialRecommendations.csv", 'w')
 response = urlopen(baseUrl)
 soup = BeautifulSoup(response, "lxml")
+lis = []
 for child in soup.find_all("li", {"class" : "result-row"}):
+   print("child: " , child)
    stri = ""
    title = ""
    link = ""
@@ -137,10 +139,14 @@ for child in soup.find_all("li", {"class" : "result-row"}):
    link = child.p.a.attrs['href']
    date = child.p.time.attrs['datetime']
    stri = date + "," + title + "," + link + "\n"
-   try:
-       rec.write(stri)
-   except:
-       stri = date + "," + "Bad encoding!" + "," + link + "\n"
+   if stri not in lis:
+       lis.append(stri)
+       try:
+           rec.write(stri)
+       except:
+           stri = date + "," + "Bad encoding!" + "," + link + "\n"
+   else:
+       pass
 rec.close()
 
     
