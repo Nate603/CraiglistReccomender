@@ -34,10 +34,14 @@ results = parser.parse_args()
 
 #need to make either of these required arguments
 #have to type -c or -m
+if (results.car == None and results.motorcycle == None) or (results.car and results.motorcycle):
+    print('Need to select either -c or -m option')
+    quit()
 if results.car:
     baseUrl = 'https://boston.craigslist.org/search/cta?sort=rel'
 if results.motorcycle:
     baseUrl = 'https://boston.craigslist.org/search/mca?sort=rel'
+
     
 
 #print("results: " + str(results))
@@ -153,6 +157,8 @@ for row in proxies_table.tbody.find_all('tr'):
 proxy_index = random_proxy()
 proxy = proxies[proxy_index]
 for p in proxies:
+    req = Request(baseUrl)
+    req.set_proxy(proxy['ip'] + ':' + proxy['port'], 'http')
     try:
         test = urlopen(baseUrl)
     except:
@@ -161,7 +167,7 @@ for p in proxies:
         proxy = proxies[proxy_index]
 
 rec = open("initialRecommendations.csv", 'w')
-rec.write('date' + "," + 'title' + "," + 'link' + ',' + 'Make/Model' + ',' + 'odometer' + ',' 
+rec.write('date' + "," + 'title' + "," + 'link' + ',' + 'price' + ',' + 'Make/Model' + ',' + 'odometer' + ',' 
           + 'Color' + ','+ 'Fuel Type' + ','+ 'VIN' + ','+ 'Title Status' + ','+ 'Car Type' + ','
           + 'Transmission' + ','+ 'Size' + ','+ 'Drive' + ','+ 'Cyclinders' + ',' + 'Condition' + ',' '\n')
 response = urlopen(baseUrl)
@@ -169,78 +175,86 @@ soup = BeautifulSoup(response, "lxml")
 lis = []
 counter = 0
 for child in soup.find_all("li", {"class" : "result-row"}):
-   stri = ""
-   title = ""
-   link = ""
-   date = ""
-   title = child.p.a.get_text()
-   link = child.p.a.attrs['href']
-   date = child.p.time.attrs['datetime']
-   stri = date + "," + title + "," + link + "\n"
-   req = Request(baseUrl)
-   req.set_proxy(proxy['ip'] + ':' + proxy['port'], 'http')
-   print('proxy set')
-   counter = counter + 1
-   if counter % 10 == 0:
-       proxy_index = random_proxy()
-       proxy = proxies[proxy_index]
-       print('proxy: ' , proxy)
-   if stri not in lis:
-       lis.append(stri)
-       nextlink = urlopen(link)
-       soup2 = BeautifulSoup(nextlink, "lxml")
-       listofstrings=[]
-       count=0
-       for child2 in soup2.find_all("p", {"class" : "attrgroup"}):
-           datadict={}
-           childlist=[]
-           datadict = {'name':"" ,'odometer':"",'paint color':"",'fuel':"",
-                       'VIN':'','title status':"",'type':"",'transmission':"",
-                       'size':"",'drive':"",'cylinders':"",'condition':""}
-           count=count+1
-           if count == 2:
-               for children in child2.find_all('span'):
-                   listofstrings.append(children.get_text())       
-           else:        
-               listofstrings.append(child2.get_text().strip())
-               
-            #print(listofstrings)
-           datadict['name'] = listofstrings[0]
-           #print(datadict)
-           
-           for data in listofstrings:
-               keyvalue = data.split(":")
-               try:
-                   keyvalue[1]=keyvalue[1].strip()
-               except IndexError:
-                   pass
-               #print(keyvalue)
-               try:
-                   datadict[keyvalue[0]]=keyvalue[1]
-               except IndexError:
-                   pass
-           for k in datadict:
-               if datadict[k] == '':
-                   datadict[k] = 'N/A'
-           print("data: " , datadict)
-           #print(listofstrings)
-           #print(child2.get_text())
-           
+    if counter != 25:
+       stri = ""
+       title = ""
+       link = ""
+       date = ""
+       price = ""
+       title = child.p.a.get_text()
+       link = child.p.a.attrs['href']
+       date = child.p.time.attrs['datetime']
        try:
-           stri = (str(date) + "," + str(title) + "," + str(link) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
-           + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
-           + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
-           + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
-           rec.write(stri)
+           price = child.find("span", {"class" : "result-price"}).get_text()
        except:
-           stri = (str(date) + "," + "Bad Encoding!" + "," + str(link) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
-           + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
-           + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
-           + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
-           rec.write(stri)
-   else:
-       print('pass')
-       pass
+           price = "N/A"
+       stri = date + "," + title + "," + link + "\n"
+       req1= Request(baseUrl)
+       req1.set_proxy(proxy['ip'] + ':' + proxy['port'], 'http')
+       print('proxy set')
+       counter = counter + 1
+       if counter % 5 == 0:
+           proxy_index = random_proxy()
+           proxy = proxies[proxy_index]
+           print('proxy: ' , proxy)
+       if stri not in lis:
+           lis.append(stri)
+           nextlink = urlopen(link)
+           soup2 = BeautifulSoup(nextlink, "lxml")
+           listofstrings=[]
+           count=0
+           for child2 in soup2.find_all("p", {"class" : "attrgroup"}):
+               datadict={}
+               childlist=[]
+               datadict = {'name':"" ,'odometer':"",'paint color':"",'fuel':"",
+                           'VIN':'','title status':"",'type':"",'transmission':"",
+                           'size':"",'drive':"",'cylinders':"",'condition':""}
+               count=count+1
+               if count == 2:
+                   for children in child2.find_all('span'):
+                       listofstrings.append(children.get_text())       
+               else:        
+                   listofstrings.append(child2.get_text().strip())
+                   
+                #print(listofstrings)
+               datadict['name'] = listofstrings[0]
+               #print(datadict)
+               
+               for data in listofstrings:
+                   keyvalue = data.split(":")
+                   try:
+                       keyvalue[1]=keyvalue[1].strip()
+                   except IndexError:
+                       pass
+                   #print(keyvalue)
+                   try:
+                       datadict[keyvalue[0]]=keyvalue[1]
+                   except IndexError:
+                       pass
+               for k in datadict:
+                   if datadict[k] == '':
+                       datadict[k] = 'N/A'
+               print("data: " , datadict)
+               #print(listofstrings)
+               #print(child2.get_text())
+               
+           try:
+               stri = (str(date) + "," + str(title) + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
+               + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
+               + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
+               + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
+               rec.write(stri)
+           except:
+               stri = (str(date) + "," + "Bad Encoding!" + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
+               + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
+               + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
+               + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
+               rec.write(stri)
+       else:
+           print('pass')
+           pass
+    else:
+        break
 rec.close()
 
 
