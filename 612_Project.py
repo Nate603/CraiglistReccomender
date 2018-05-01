@@ -236,8 +236,7 @@ for child in soup.find_all("li", {"class" : "result-row"}):
                        datadict[k] = 'N/A'
                print("data: " , datadict)
                #print(listofstrings)
-               #print(child2.get_text())
-               
+               #print(child2.get_text())      
            try:
                stri = (str(date) + "," + str(title) + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
                + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
@@ -256,6 +255,12 @@ for child in soup.find_all("li", {"class" : "result-row"}):
     else:
         break
 rec.close()
+
+
+
+
+
+
 
 
     
