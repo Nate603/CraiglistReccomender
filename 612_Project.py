@@ -16,13 +16,8 @@ parser.add_argument("-mi", "--miles", help="Miles from zip (default: None)", act
 parser.add_argument("-z", "--zip", help="Zipcode (default: None)", action="store", default=None)
 parser.add_argument("-minp", "--min_price", help="Minimum price of the item (default: None)", action="store", default=None)
 parser.add_argument("-maxp", "--max_price", help="Maximum price of the item (default: None)", action="store", default=None)
-<<<<<<< HEAD
-parser.add_argument("-ma", "--make", help="Make/Model of the item (default: None)", action="store", default=None)
-parser.add_argument("-mo", "--model", help="Make/Model of the item (default: None)", action="store", default=None)
-=======
-parser.add_argument("-ma", "--make", help="Make of the item (default: None)", action="store", default=None)
-parser.add_argument("-mo", "--model", help="Model of the item (default: None)", action="store", default=None)
->>>>>>> master
+parser.add_argument("-ma", "--make", help="Make of the item (default: None) (Format: NISSAN)", action="store", default=None)
+parser.add_argument("-mo", "--model", help="Model of the item (default: None) (Format: Maxima)", action="store", default=None)
 parser.add_argument("-minen", "--min_eng_disp", help="Minimum engine displacement (default: None)", action="store", default=None)
 parser.add_argument("-maxen", "--max_eng_disp", help="Maximum engine displacement (default: None)", action="store", default=None)
 parser.add_argument("-miny", "--min_year", help="Minimum model year (default: None)", action="store", default=None)
@@ -39,10 +34,19 @@ results = parser.parse_args()
 
 #need to make either of these required arguments
 #have to type -c or -m
+if (results.car == None and results.motorcycle == None) or (results.car and results.motorcycle):
+    print('Need to select either -c or -m option')
+    quit()
 if results.car:
     baseUrl = 'https://boston.craigslist.org/search/cta?sort=rel'
 if results.motorcycle:
     baseUrl = 'https://boston.craigslist.org/search/mca?sort=rel'
+if results.zip == None:
+    print('Need a zipcode')
+    quit()
+if results.max_odo == None:
+    print('Need a max mileage')
+    quit()
 
 #print("results: " + str(results))
 #declare variables
@@ -134,13 +138,6 @@ if results.location:
 
 
 print(baseUrl)        
-<<<<<<< HEAD
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
-rec = open("initialRecommendations.csv", 'w')
-response = urlopen(baseUrl)
-soup = BeautifulSoup(response, "lxml")
-=======
 from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
@@ -164,6 +161,8 @@ for row in proxies_table.tbody.find_all('tr'):
 proxy_index = random_proxy()
 proxy = proxies[proxy_index]
 for p in proxies:
+    req = Request(baseUrl)
+    req.set_proxy(proxy['ip'] + ':' + proxy['port'], 'http')
     try:
         test = urlopen(baseUrl)
     except:
@@ -172,32 +171,39 @@ for p in proxies:
         proxy = proxies[proxy_index]
 
 rec = open("initialRecommendations.csv", 'w')
-rec.write('date' + "," + 'title' + "," + 'link' + ',' + 'Make/Model' + ',' + 'odometer' + ',' 
+if results.car:
+    rec.write('date' + "," + 'title' + "," + 'link' + ',' + 'price' + ',' + 'Make/Model' + ',' + 'odometer' + ',' 
           + 'Color' + ','+ 'Fuel Type' + ','+ 'VIN' + ','+ 'Title Status' + ','+ 'Car Type' + ','
-          + 'Transmission' + ','+ 'Size' + ','+ 'Drive' + ','+ 'Cyclinders' + ',' + 'Condition' + ',' '\n')
+          + 'Transmission' + ','+ 'Size' + ','+ 'Drive' + ','+ 'Cyclinders' + ',' + 'Condition' + '\n')
+if results.motorcycle:
+    rec.write('date' + "," + 'title' + "," + 'link' + ',' + 'price' + ',' + 'Make/Model' + ',' + 'odometer' + ',' 
+              + 'Color' + ',' + 'Fuel Type' + ',' + 'Title Status' + ',' + 'Engine Displacement' + ',' + 'Transmission' + ',' + 'Condition' + '\n')
 response = urlopen(baseUrl)
 soup = BeautifulSoup(response, "lxml")
-lis = []
 counter = 0
 for child in soup.find_all("li", {"class" : "result-row"}):
-   stri = ""
-   title = ""
-   link = ""
-   date = ""
-   title = child.p.a.get_text()
-   link = child.p.a.attrs['href']
-   date = child.p.time.attrs['datetime']
-   stri = date + "," + title + "," + link + "\n"
-   req = Request(baseUrl)
-   req.set_proxy(proxy['ip'] + ':' + proxy['port'], 'http')
-   print('proxy set')
-   counter = counter + 1
-   if counter % 10 == 0:
-       proxy_index = random_proxy()
-       proxy = proxies[proxy_index]
-       print('proxy: ' , proxy)
-   if stri not in lis:
-       lis.append(stri)
+    if counter != 25:
+       stri = ""
+       title = ""
+       link = ""
+       date = ""
+       price = ""
+       title = child.p.a.get_text()
+       link = child.p.a.attrs['href']
+       date = child.p.time.attrs['datetime']
+       try:
+           price = child.find("span", {"class" : "result-price"}).get_text()
+       except:
+           price = "N/A"
+       stri = date + "," + title + "," + link + "\n"
+       req1= Request(baseUrl)
+       req1.set_proxy(proxy['ip'] + ':' + proxy['port'], 'http')
+       print('proxy set')
+       counter = counter + 1
+       if counter % 5 == 0:
+           proxy_index = random_proxy()
+           proxy = proxies[proxy_index]
+           print('proxy: ' , proxy)
        nextlink = urlopen(link)
        soup2 = BeautifulSoup(nextlink, "lxml")
        listofstrings=[]
@@ -205,9 +211,13 @@ for child in soup.find_all("li", {"class" : "result-row"}):
        for child2 in soup2.find_all("p", {"class" : "attrgroup"}):
            datadict={}
            childlist=[]
-           datadict = {'name':"" ,'odometer':"",'paint color':"",'fuel':"",
+           if results.car:
+               datadict = {'name':"" ,'odometer':"",'paint color':"",'fuel':"",
                        'VIN':'','title status':"",'type':"",'transmission':"",
                        'size':"",'drive':"",'cylinders':"",'condition':""}
+           if results.motorcycle:
+               datadict = {'name':"" ,'odometer':"",'paint color':"",'fuel':"",'title status':"",'transmission':"",
+                           'condition':"",'engine displacement (CC)':""}
            count=count+1
            if count == 2:
                for children in child2.find_all('span'):
@@ -235,24 +245,157 @@ for child in soup.find_all("li", {"class" : "result-row"}):
                    datadict[k] = 'N/A'
            print("data: " , datadict)
            #print(listofstrings)
-           #print(child2.get_text())
-           
-       try:
-           stri = (str(date) + "," + str(title) + "," + str(link) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
+           #print(child2.get_text())   
+           if results.car:
+               try:
+                   stri = (str(date) + "," + str(title) + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
+           + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
+           + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
+          + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
+                   rec.write(stri)
+               except:
+                  stri = (str(date) + "," + "Bad Encoding!" + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
            + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
            + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
            + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
-           rec.write(stri)
-       except:
-           stri = (str(date) + "," + "Bad Encoding!" + "," + str(link) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
-           + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
-           + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
-           + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
-           rec.write(stri)
-   else:
-       print('pass')
-       pass
+                  rec.write(stri)
+           if results.motorcycle:
+               try:
+                  stri = (str(date) + "," + str(title) + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + ","
+                        + str(datadict['paint color']) + "," + str(datadict['fuel']) + "," + str(datadict['title status']) + "," + str(datadict['engine displacement (CC)']) + "," + 
+                        str(datadict['transmission']) + "," + str(datadict['condition']) + "\n")
+                  rec.write(stri)
+               except:
+                  stri = (str(date) + "," + "Bad Encoding!" + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + ","
+                        + str(datadict['paint color']) + "," + str(datadict['fuel']) + "," + str(datadict['title status']) + "," + str(datadict['engine displacement (CC)']) + "," + 
+                        str(datadict['transmission']) + "," + str(datadict['condition']) + "\n")
+                  rec.write(stri)
+    else:
+        break
 rec.close()
-
-
+def removeduplicates():
+    nodup = open('noduplicates.csv' , 'w')
+    recom = open('initialRecommendations.csv', 'r')
+    unique = []
+    for row in recom:
+        token = row.split(',')
+        price = token[3]
+        makemodel = token[4]
+        ident = price + ',' + makemodel
+        print('ident: ' + ident)
+        if ident not in unique:
+            print('original: ' + ident)
+            unique.append(ident)
+            nodup.write(row)
+        else:
+            print('duplicate')
+            pass
+    nodup.close()
+    recom.close()
+def grabSalePrice():
+    from selenium import webdriver
+    from selenium.webdriver.support.ui import Select
+    from bs4 import BeautifulSoup
+    noDup = open('noduplicates.csv', 'r')
+    url = 'https://www.cargurus.com/Cars/instantMarketValue.action'
+    driver = webdriver.Chrome('/Users/Nate/anaconda3/selenium/webdriver/chromedriver')
+    driver.get(url)
     
+    selectMake = Select(driver.find_element_by_id('carPicker_makerSelect'))
+    selectModel = Select(driver.find_element_by_id('carPicker_modelSelect'))
+    selectYear = Select(driver.find_element_by_id('carPicker_year1Select'))
+    selectTrim = Select(driver.find_element_by_id('carPicker_trimSelect'))
+    selectZip = driver.find_element_by_id('listingFormZip')
+    selectMileage = driver.find_element_by_id('mileage')
+    firstRow = True
+    # select by visible text
+    for row in noDup:
+        if firstRow == True:
+            firstRow = False
+            pass
+        else:
+            token = row.split(',')
+            year = token[4][:5]
+            selectMake.select_by_visible_text(results.make)
+            selectModel.select_by_visible_text(results.model)
+            selectYear.select_by_visible_text(year)
+            selectTrim.select_by_index(1)
+            selectZip.send_keys(results.zip)
+            selectMileage.send_keys(results.max_odo)
+            
+            updatedurl = driver.page_source
+            
+            soup = BeautifulSoup(updatedurl, 'html.parser')
+removeduplicates()
+#grabSalePrice()
+def sort():
+    noDup = open('noduplicates.csv' , 'r')
+    userPrice = float(results.max_price)
+    goodReco = open('goodRecommendations.csv' , 'w')
+    firstRow = True
+    for row in noDup:
+        token = row.split(',')
+        price = token[3]
+        print(price)
+        if firstRow == True:
+            firstRow = False
+            pass
+        else:
+            if price == "N/A":
+                print('doesnt pass')
+                pass
+            else:
+                price = price.replace("$", "")
+                price = price.replace("," , "")
+                print('raw price: ' + price)
+                carPrice = float(price)
+                if carPrice > userPrice:
+                    print('bad')
+                else:
+                    print('good')
+                    goodReco.write(row)
+def visualize():
+    import matplotlib.pyplot as plt
+    import numpy as np
+    noDup = open('noduplicates.csv' , 'r')
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    priceList = []
+    firstRow = True
+    names = []
+    priceList.append(float(results.max_price))
+    names.append('userPrice')
+    for row in noDup:
+        if firstRow == True:
+            firstRow = False
+            pass
+        else:
+            token = row.split(',')
+            price = token[3]
+            name = token[4]
+            names.append(name)
+            if price == "N/A":
+                pass
+            else:
+                price = price.replace("$", "")
+                price = price.replace("," , "")
+                priceList.append(float(price))
+    ind = np.arange(len(priceList))
+    width = 0.35
+    rects = ax.bar(ind, priceList, width, color='red')
+    rects[0].set_color('green')
+    ax.set_xlim(-width,len(ind)+width)
+    ax.set_xticks(ind+width)
+    xtickNames = ax.set_xticklabels(names)
+    ax.set_ylabel('Price')
+    ax.set_xlabel('Titles')
+    ax.set_title('Prices of good recommendations')
+    plt.setp(xtickNames, rotation=90, fontsize=10)
+    plt.axhline(y=float(results.max_price))
+    plt.show()
+def move():
+    import subprocess
+    subprocess.call(['mkdir "./good_recommendations"'])
+    subprocess.call(['mv', 'goodRecommendations.csv', './good_recommendations'])
+#visualize()
+#move()
