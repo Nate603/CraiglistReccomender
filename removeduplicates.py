@@ -86,7 +86,7 @@ def removedupe(resultsZipCode):
         if reccommendedprice == "":
             reccommendedprice = "Not Enough Pricing Data"
         
-        reccommendedprices.append(reccommendedprice.strip())
+        reccommendedprices.append(reccommendedprice.strip().replace(",", ""))
         #print(reccommendedprice)
             
     #print(reccommendedprices)
@@ -97,9 +97,9 @@ def removedupe(resultsZipCode):
     for index, row in dfafter.iterrows():
         oldPrice = row["price"]
         newPrice = row["ReccommendedPrice"]
-        oldPrice = oldPrice.replace("$" , "")
-        oldPrice = oldPrice.replace("," , "")
-        newPrice = newPrice.replace("," , "")
+        oldPrice = str(oldPrice).replace("$" , "")
+        oldPrice = str(oldPrice).replace("," , "")
+        newPrice = str(newPrice).replace("," , "")
         if newPrice == "Not Enough Pricing Data" or newPrice == "Bad Data":
             suggestions.append("Bad Data")
             priceDiff.append("Bad Data")

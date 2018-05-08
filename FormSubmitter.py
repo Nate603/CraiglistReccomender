@@ -16,7 +16,7 @@ import time
 
 
 url = 'https://www.cargurus.com/Cars/instantMarketValue.action'
-driver = webdriver.Chrome('/Users/Nate/anaconda3/selenium/webdriver/chromedriver')
+driver = webdriver.Chrome('/Users/zacharygirard/Documents/GitHub/CraigslistRecommender/chromedriver')
 driver.get(url)
 
 time.sleep(1)
