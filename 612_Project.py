@@ -5,10 +5,12 @@ Created on Tue Apr 24 20:37:04 2018
 """
 
 
-#import csv
-#from urllib.request import urlopen
-#from bs4 import BeautifulSoup
+import csv
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
 import argparse
+import removeduplicates
+import FormSubmitter as Form
 parser = argparse.ArgumentParser(description='Takes in filters for craigslist search (exclusively for motorcycles and cars)')
 parser.add_argument("-m", "--motorcycle", help="Boolean For Motorcycle Search", action="store_true")
 parser.add_argument("-c", "--car", help="Boolean For Car Search", action="store_true")
@@ -31,6 +33,7 @@ parser.add_argument("-ti", "--title", help="Title status (Options: clean, salvag
 parser.add_argument("-tr", "--trans", help="Transmission (Options: manual, automatic, other) (default: None)", action="store", default=None)
 parser.add_argument("-l", "--location", help="Location of the item (default: None)", action="store", default=None)
 results = parser.parse_args()
+#for location, do zipcode lookup with city and state ex.(Durham,NH)
 
 #need to make either of these required arguments
 #have to type -c or -m
@@ -41,7 +44,9 @@ if results.car:
     baseUrl = 'https://boston.craigslist.org/search/cta?sort=rel'
 if results.motorcycle:
     baseUrl = 'https://boston.craigslist.org/search/mca?sort=rel'
-
+if results.zip == None:
+    print("need a zipcode")
+    quit()
     
 
 #print("results: " + str(results))
@@ -167,7 +172,7 @@ for p in proxies:
         proxy = proxies[proxy_index]
 
 rec = open("initialRecommendations.csv", 'w')
-rec.write('date' + "," + 'title' + "," + 'link' + ',' + 'price' + ',' + 'Make/Model' + ',' + 'odometer' + ',' 
+rec.write('date' + "," + 'title' + "," + 'link' + ',' + 'price' + "," + 'year' + ',' + 'Make/Model' + ',' + 'odometer' + ',' 
           + 'Color' + ','+ 'Fuel Type' + ','+ 'VIN' + ','+ 'Title Status' + ','+ 'Car Type' + ','
           + 'Transmission' + ','+ 'Size' + ','+ 'Drive' + ','+ 'Cyclinders' + ',' + 'Condition' + ',' '\n')
 response = urlopen(baseUrl)
@@ -186,6 +191,11 @@ for child in soup.find_all("li", {"class" : "result-row"}):
        date = child.p.time.attrs['datetime']
        try:
            price = child.find("span", {"class" : "result-price"}).get_text()
+           if "$" not in price:
+               exit
+           else:
+               price = price.replace("," , "")
+               price = price.replace("$", "")
        except:
            price = "N/A"
        stri = date + "," + title + "," + link + "\n"
@@ -236,15 +246,16 @@ for child in soup.find_all("li", {"class" : "result-row"}):
                        datadict[k] = 'N/A'
                print("data: " , datadict)
                #print(listofstrings)
-               #print(child2.get_text())      
+               #print(child2.get_text())     
+               #search description for other form inputs?
            try:
-               stri = (str(date) + "," + str(title) + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
+               stri = (str(date) + "," + str(title).replace(',','') + "," + str(link) + "," + str(price) + "," + str(datadict['name'][0:4]) + "," + str(datadict['name'][5:]) + "," + str(datadict['odometer']) + "," 
                + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
                + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
                + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
                rec.write(stri)
            except:
-               stri = (str(date) + "," + "Bad Encoding!" + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
+               stri = (str(date) + "," + "Bad Encoding!" + "," + str(link) + "," + str(price) + "," + str(datadict['name'][0:4]) + "," + str(datadict['name'][5:]) + "," + str(datadict['odometer']) + "," 
                + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
                + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
                + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
@@ -256,7 +267,67 @@ for child in soup.find_all("li", {"class" : "result-row"}):
         break
 rec.close()
 
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+def visualize():    
+    noDup = open('NoDuplicates.csv' , 'r',encoding='latin-1')
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    priceList = []
+    firstRow = True
+    names = []
+    recPriceList = []
+    for row in noDup:
+        if firstRow == True:
+            firstRow = False
+            pass
+        else:
+            token = row.split(',')
+            price = token[3]
+            name = token[4] + token[5] + token[6]
+            recPrices = token[18]
+            if recPrices == "Not Enough Pricing Data" or recPrices == "Bad Data":
+                recPrices = 0
+                recPriceList.append(float(recPrices))
+            else:
+                recPriceList.append(float(recPrices))
+            names.append(name)
+            if price == "N/A":
+                pass
+            else:
+                price = price.replace("$", "")
+                print(price)
+                priceList.append(float(price))
+    print(priceList)
+    print(names)
+    print(recPriceList)
+    ind = np.arange(len(priceList))
+    width = 0.35
+    rects = ax.bar(ind, priceList, width, color='red')
+    rects1 = ax.bar(ind+width, recPriceList, width, color='blue')
+    ax.set_xlim(-width,len(ind)+width)
+    ax.set_xticks(ind+width)
+    xtickNames = ax.set_xticklabels(names)
+    ax.legend((rects[0],rects1[0]),('Craigslist Price','Recommended Price'))
+    ax.set_ylabel('Price')
+    ax.set_xlabel('Titles')
+    ax.set_title('Prices of recommendations')
+    plt.setp(xtickNames, rotation=45, fontsize=8)
+    plt.tight_layout()
+    plt.show()
+    
+#remove duplicates
+fileName = results.make + "_" + results.model + "_" + results.zip
+removeduplicates.removedupe(results.zip)
 
+#visulaize it
+visualize()
+
+#move files with bash
+import subprocess
+subprocess.check_call(["./move.sh", fileName])
+#subprocess.call(['mkdir' fileName,mv NoDuplicates.csv fileName,mv initialRecommendations.csv fileName])
 
 
 
