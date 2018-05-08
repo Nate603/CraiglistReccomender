@@ -16,7 +16,7 @@ parser.add_argument("-mi", "--miles", help="Miles from zip (default: None)", act
 parser.add_argument("-z", "--zip", help="Zipcode (default: None)", action="store", default=None)
 parser.add_argument("-minp", "--min_price", help="Minimum price of the item (default: None)", action="store", default=None)
 parser.add_argument("-maxp", "--max_price", help="Maximum price of the item (default: None)", action="store", default=None)
-parser.add_argument("-ma", "--make", help="Make of the item (default: None) (Format: NISSAN)", action="store", default=None)
+parser.add_argument("-ma", "--make", help="Make of the item (default: None) (Format: Nissan)", action="store", default=None)
 parser.add_argument("-mo", "--model", help="Model of the item (default: None) (Format: Maxima)", action="store", default=None)
 parser.add_argument("-minen", "--min_eng_disp", help="Minimum engine displacement (default: None)", action="store", default=None)
 parser.add_argument("-maxen", "--max_eng_disp", help="Maximum engine displacement (default: None)", action="store", default=None)
@@ -137,142 +137,147 @@ if results.location:
     baseUrl = baseUrl + location
 
 
-print(baseUrl)        
-from urllib.request import Request, urlopen
-from bs4 import BeautifulSoup
-from fake_useragent import UserAgent
-import random
-def random_proxy():
-    return random.randint(0, len(proxies) - 1)
-userAg = UserAgent()
-proxies = []
-# Retrieve latest proxies
-proxies_req = Request('https://www.sslproxies.org/')
-proxies_req.add_header('User-Agent', userAg.random)
-proxies_doc = urlopen(proxies_req).read().decode('utf8')
-soup = BeautifulSoup(proxies_doc, 'html.parser')
-proxies_table = soup.find(id='proxylisttable')
+#print(baseUrl)        
+#from urllib.request import Request, urlopen
+#from bs4 import BeautifulSoup
+#from fake_useragent import UserAgent
+#import random
+#def random_proxy():
+#    return random.randint(0, len(proxies) - 1)
+#userAg = UserAgent()
+#proxies = []
+## Retrieve latest proxies
+#proxies_req = Request('https://www.sslproxies.org/')
+#proxies_req.add_header('User-Agent', userAg.random)
+#proxies_doc = urlopen(proxies_req).read().decode('utf8')
+#soup = BeautifulSoup(proxies_doc, 'html.parser')
+#proxies_table = soup.find(id='proxylisttable')
+#
+## Save proxies in the array
+#for row in proxies_table.tbody.find_all('tr'):
+#    proxies.append({'ip' : row.find_all('td')[0].string, 'port' : row.find_all('td')[1].string})
+#
+## Choose a random proxy
+#proxy_index = random_proxy()
+#proxy = proxies[proxy_index]
+#for p in proxies:
+#    req = Request(baseUrl)
+#    req.set_proxy(proxy['ip'] + ':' + proxy['port'], 'http')
+#    try:
+#        test = urlopen(baseUrl)
+#    except:
+#        del proxies[proxy_index]
+#        proxy_index = random_proxy()
+#        proxy = proxies[proxy_index]
+#
+#rec = open("initialRecommendations.csv", 'w')
+#if results.car:
+#    rec.write('date' + "," + 'title' + "," + 'link' + ',' + 'price' + ',' + 'Make/Model' + ',' + 'odometer' + ',' 
+#          + 'Color' + ','+ 'Fuel Type' + ','+ 'VIN' + ','+ 'Title Status' + ','+ 'Car Type' + ','
+#          + 'Transmission' + ','+ 'Size' + ','+ 'Drive' + ','+ 'Cyclinders' + ',' + 'Condition' + '\n')
+#if results.motorcycle:
+#    rec.write('date' + "," + 'title' + "," + 'link' + ',' + 'price' + ',' + 'Make/Model' + ',' + 'odometer' + ',' 
+#              + 'Color' + ',' + 'Fuel Type' + ',' + 'Title Status' + ',' + 'Engine Displacement' + ',' + 'Transmission' + ',' + 'Condition' + '\n')
+#response = urlopen(baseUrl)
+#soup = BeautifulSoup(response, "lxml")
+#counter = 0
+#for child in soup.find_all("li", {"class" : "result-row"}):
+#    if counter != 25:
+#       stri = ""
+#       title = ""
+#       link = ""
+#       date = ""
+#       price = ""
+#       title = child.p.a.get_text()
+#       link = child.p.a.attrs['href']
+#       date = child.p.time.attrs['datetime']
+#       try:
+#           price = child.find("span", {"class" : "result-price"}).get_text()
+#            if "$" not in price:
+#                price = "N/A"
+#            else:
+#               price = price.replace(",", "")
+#       except:
+#           price = "N/A"
+#       stri = date + "," + title + "," + link + "\n"
+#       req1= Request(baseUrl)
+#       req1.set_proxy(proxy['ip'] + ':' + proxy['port'], 'http')
+#       print('proxy set')
+#       counter = counter + 1
+#       if counter % 5 == 0:
+#           proxy_index = random_proxy()
+#           proxy = proxies[proxy_index]
+#           print('proxy: ' , proxy)
+#       nextlink = urlopen(link)
+#       soup2 = BeautifulSoup(nextlink, "lxml")
+#       listofstrings=[]
+#       count=0
+#       for child2 in soup2.find_all("p", {"class" : "attrgroup"}):
+#           datadict={}
+#           childlist=[]
+#           if results.car:
+#               datadict = {'name':"" ,'odometer':"",'paint color':"",'fuel':"",
+#                       'VIN':'','title status':"",'type':"",'transmission':"",
+#                       'size':"",'drive':"",'cylinders':"",'condition':""}
+#           if results.motorcycle:
+#               datadict = {'name':"" ,'odometer':"",'paint color':"",'fuel':"",'title status':"",'transmission':"",
+#                           'condition':"",'engine displacement (CC)':""}
+#           count=count+1
+#           if count == 2:
+#               for children in child2.find_all('span'):
+#                   listofstrings.append(children.get_text())       
+#           else:        
+#               listofstrings.append(child2.get_text().strip())
+#               
+#            #print(listofstrings)
+#           datadict['name'] = listofstrings[0]
+#           #print(datadict)
+#           
+#           for data in listofstrings:
+#               keyvalue = data.split(":")
+#               try:
+#                   keyvalue[1]=keyvalue[1].strip()
+#               except IndexError:
+#                   pass
+#               #print(keyvalue)
+#               try:
+#                   datadict[keyvalue[0]]=keyvalue[1]
+#               except IndexError:
+#                   pass
+#           for k in datadict:
+#               if datadict[k] == '':
+#                   datadict[k] = 'N/A'
+#           print("data: " , datadict)
+#           #print(listofstrings)
+#           #print(child2.get_text())   
+#           if results.car:
+#               try:
+#                   stri = (str(date) + "," + str(title) + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
+#           + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
+#           + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
+#          + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
+#                   rec.write(stri)
+#               except:
+#                  stri = (str(date) + "," + "Bad Encoding!" + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
+#           + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
+#           + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
+#           + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
+#                  rec.write(stri)
+#           if results.motorcycle:
+#               try:
+#                  stri = (str(date) + "," + str(title) + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + ","
+#                        + str(datadict['paint color']) + "," + str(datadict['fuel']) + "," + str(datadict['title status']) + "," + str(datadict['engine displacement (CC)']) + "," + 
+#                        str(datadict['transmission']) + "," + str(datadict['condition']) + "\n")
+#                  rec.write(stri)
+#               except:
+#                  stri = (str(date) + "," + "Bad Encoding!" + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + ","
+#                        + str(datadict['paint color']) + "," + str(datadict['fuel']) + "," + str(datadict['title status']) + "," + str(datadict['engine displacement (CC)']) + "," + 
+#                        str(datadict['transmission']) + "," + str(datadict['condition']) + "\n")
+#                  rec.write(stri)
+#    else:
+#        break
+#rec.close()
 
-# Save proxies in the array
-for row in proxies_table.tbody.find_all('tr'):
-    proxies.append({'ip' : row.find_all('td')[0].string, 'port' : row.find_all('td')[1].string})
-
-# Choose a random proxy
-proxy_index = random_proxy()
-proxy = proxies[proxy_index]
-for p in proxies:
-    req = Request(baseUrl)
-    req.set_proxy(proxy['ip'] + ':' + proxy['port'], 'http')
-    try:
-        test = urlopen(baseUrl)
-    except:
-        del proxies[proxy_index]
-        proxy_index = random_proxy()
-        proxy = proxies[proxy_index]
-
-rec = open("initialRecommendations.csv", 'w')
-if results.car:
-    rec.write('date' + "," + 'title' + "," + 'link' + ',' + 'price' + ',' + 'Make/Model' + ',' + 'odometer' + ',' 
-          + 'Color' + ','+ 'Fuel Type' + ','+ 'VIN' + ','+ 'Title Status' + ','+ 'Car Type' + ','
-          + 'Transmission' + ','+ 'Size' + ','+ 'Drive' + ','+ 'Cyclinders' + ',' + 'Condition' + '\n')
-if results.motorcycle:
-    rec.write('date' + "," + 'title' + "," + 'link' + ',' + 'price' + ',' + 'Make/Model' + ',' + 'odometer' + ',' 
-              + 'Color' + ',' + 'Fuel Type' + ',' + 'Title Status' + ',' + 'Engine Displacement' + ',' + 'Transmission' + ',' + 'Condition' + '\n')
-response = urlopen(baseUrl)
-soup = BeautifulSoup(response, "lxml")
-counter = 0
-for child in soup.find_all("li", {"class" : "result-row"}):
-    if counter != 25:
-       stri = ""
-       title = ""
-       link = ""
-       date = ""
-       price = ""
-       title = child.p.a.get_text()
-       link = child.p.a.attrs['href']
-       date = child.p.time.attrs['datetime']
-       try:
-           price = child.find("span", {"class" : "result-price"}).get_text()
-       except:
-           price = "N/A"
-       stri = date + "," + title + "," + link + "\n"
-       req1= Request(baseUrl)
-       req1.set_proxy(proxy['ip'] + ':' + proxy['port'], 'http')
-       print('proxy set')
-       counter = counter + 1
-       if counter % 5 == 0:
-           proxy_index = random_proxy()
-           proxy = proxies[proxy_index]
-           print('proxy: ' , proxy)
-       nextlink = urlopen(link)
-       soup2 = BeautifulSoup(nextlink, "lxml")
-       listofstrings=[]
-       count=0
-       for child2 in soup2.find_all("p", {"class" : "attrgroup"}):
-           datadict={}
-           childlist=[]
-           if results.car:
-               datadict = {'name':"" ,'odometer':"",'paint color':"",'fuel':"",
-                       'VIN':'','title status':"",'type':"",'transmission':"",
-                       'size':"",'drive':"",'cylinders':"",'condition':""}
-           if results.motorcycle:
-               datadict = {'name':"" ,'odometer':"",'paint color':"",'fuel':"",'title status':"",'transmission':"",
-                           'condition':"",'engine displacement (CC)':""}
-           count=count+1
-           if count == 2:
-               for children in child2.find_all('span'):
-                   listofstrings.append(children.get_text())       
-           else:        
-               listofstrings.append(child2.get_text().strip())
-               
-            #print(listofstrings)
-           datadict['name'] = listofstrings[0]
-           #print(datadict)
-           
-           for data in listofstrings:
-               keyvalue = data.split(":")
-               try:
-                   keyvalue[1]=keyvalue[1].strip()
-               except IndexError:
-                   pass
-               #print(keyvalue)
-               try:
-                   datadict[keyvalue[0]]=keyvalue[1]
-               except IndexError:
-                   pass
-           for k in datadict:
-               if datadict[k] == '':
-                   datadict[k] = 'N/A'
-           print("data: " , datadict)
-           #print(listofstrings)
-           #print(child2.get_text())   
-           if results.car:
-               try:
-                   stri = (str(date) + "," + str(title) + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
-           + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
-           + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
-          + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
-                   rec.write(stri)
-               except:
-                  stri = (str(date) + "," + "Bad Encoding!" + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + "," 
-           + str(datadict['paint color']) + ","+ str(datadict['fuel']) + ","+ str(datadict['VIN']) + ","+ str(datadict['title status']) + "," 
-           + str(datadict['type']) + ","+ str(datadict['transmission']) + ","+ str(datadict['size']) + ","+ str(datadict['drive']) + ","
-           + str(datadict['cylinders']) + ","+ str(datadict['condition']) + "\n")
-                  rec.write(stri)
-           if results.motorcycle:
-               try:
-                  stri = (str(date) + "," + str(title) + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + ","
-                        + str(datadict['paint color']) + "," + str(datadict['fuel']) + "," + str(datadict['title status']) + "," + str(datadict['engine displacement (CC)']) + "," + 
-                        str(datadict['transmission']) + "," + str(datadict['condition']) + "\n")
-                  rec.write(stri)
-               except:
-                  stri = (str(date) + "," + "Bad Encoding!" + "," + str(link) + "," + str(price) + "," + str(datadict['name']) + "," + str(datadict['odometer']) + ","
-                        + str(datadict['paint color']) + "," + str(datadict['fuel']) + "," + str(datadict['title status']) + "," + str(datadict['engine displacement (CC)']) + "," + 
-                        str(datadict['transmission']) + "," + str(datadict['condition']) + "\n")
-                  rec.write(stri)
-    else:
-        break
-rec.close()
 def removeduplicates():
     nodup = open('noduplicates.csv' , 'w')
     recom = open('initialRecommendations.csv', 'r')
@@ -281,8 +286,13 @@ def removeduplicates():
         token = row.split(',')
         price = token[3]
         makemodel = token[4]
+        makemodel = makemodel.lower()
+        makemodel = makemodel.title()
         ident = price + ',' + makemodel
         print('ident: ' + ident)
+        if results.model not in makemodel:
+            print('pass1')
+            pass
         if ident not in unique:
             print('original: ' + ident)
             unique.append(ident)
@@ -292,13 +302,14 @@ def removeduplicates():
             pass
     nodup.close()
     recom.close()
+
 def grabSalePrice():
     from selenium import webdriver
     from selenium.webdriver.support.ui import Select
     from bs4 import BeautifulSoup
     noDup = open('noduplicates.csv', 'r')
     url = 'https://www.cargurus.com/Cars/instantMarketValue.action'
-    driver = webdriver.Chrome('/Users/Nate/anaconda3/selenium/webdriver/chromedriver')
+    driver = webdriver.Chrome('/Users/aleew/Anaconda3/chromedriver.exe')
     driver.get(url)
     
     selectMake = Select(driver.find_element_by_id('carPicker_makerSelect'))
@@ -314,20 +325,26 @@ def grabSalePrice():
             firstRow = False
             pass
         else:
-            token = row.split(',')
-            year = token[4][:5]
-            selectMake.select_by_visible_text(results.make)
-            selectModel.select_by_visible_text(results.model)
-            selectYear.select_by_visible_text(year)
-            selectTrim.select_by_index(1)
-            selectZip.send_keys(results.zip)
-            selectMileage.send_keys(results.max_odo)
-            
-            updatedurl = driver.page_source
-            
-            soup = BeautifulSoup(updatedurl, 'html.parser')
-removeduplicates()
-#grabSalePrice()
+            try:
+                token = row.split(',')
+                print("token: " , token)
+                year = token[4][:5]
+                print("year: " + year)
+                selectMake.select_by_visible_text(results.model)
+                selectModel.select_by_visible_text(results.make)
+                selectYear.select_by_visible_text(year)
+                selectTrim.select_by_index(1)
+                selectZip.send_keys(results.zip)
+                selectMileage.send_keys(results.max_odo)
+                selectMileage.send_keys(Keys.ENTER)
+                print('pass2')
+                updatedurl = driver.page_source
+                print('pass3')
+                soup = BeautifulSoup(updatedurl, 'html.parser')
+                
+            except:
+                print('bad data')
+
 def sort():
     noDup = open('noduplicates.csv' , 'r')
     userPrice = float(results.max_price)
@@ -344,9 +361,11 @@ def sort():
             if price == "N/A":
                 print('doesnt pass')
                 pass
+            if "$" not in price:
+                print('doesnt pass')
+                pass
             else:
                 price = price.replace("$", "")
-                price = price.replace("," , "")
                 print('raw price: ' + price)
                 carPrice = float(price)
                 if carPrice > userPrice:
@@ -363,8 +382,6 @@ def visualize():
     priceList = []
     firstRow = True
     names = []
-    priceList.append(float(results.max_price))
-    names.append('userPrice')
     for row in noDup:
         if firstRow == True:
             firstRow = False
@@ -378,24 +395,27 @@ def visualize():
                 pass
             else:
                 price = price.replace("$", "")
-                price = price.replace("," , "")
                 priceList.append(float(price))
     ind = np.arange(len(priceList))
     width = 0.35
     rects = ax.bar(ind, priceList, width, color='red')
-    rects[0].set_color('green')
     ax.set_xlim(-width,len(ind)+width)
     ax.set_xticks(ind+width)
     xtickNames = ax.set_xticklabels(names)
     ax.set_ylabel('Price')
     ax.set_xlabel('Titles')
-    ax.set_title('Prices of good recommendations')
-    plt.setp(xtickNames, rotation=90, fontsize=10)
-    plt.axhline(y=float(results.max_price))
+    ax.set_title('Prices of recommendations')
+    plt.setp(xtickNames, rotation=45, fontsize=10)
     plt.show()
 def move():
     import subprocess
-    subprocess.call(['mkdir "./good_recommendations"'])
-    subprocess.call(['mv', 'goodRecommendations.csv', './good_recommendations'])
-#visualize()
+    subprocess.call("./moveGoodRecs.sh")
+    print("end")
+#removeduplicates()
+if results.car:
+    grabSalePrice()
+else:
+    pass
+#sort()
+visualize()
 #move()
