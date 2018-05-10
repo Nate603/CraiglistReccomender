@@ -39,6 +39,6 @@ Bash
  
 Possible Future Work
 -Could potentially scrape more data from craigslist so that our price recommendations are more accurate. Could scrape the description and look for certain data such as car trim. Right now we just default to the first trim level.
--Also the carguru evaluator form has some drop down menus, so you can?t just type in values. Sometimes the data is not in the correct format so it does not find these values in the drop down menu.
+-Also the carguru evaluator form has some drop down menus, so you can't just type in values. Sometimes the data is not in the correct format so it does not find these values in the drop down menu.
 
 
